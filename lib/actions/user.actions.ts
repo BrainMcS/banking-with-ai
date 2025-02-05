@@ -158,10 +158,12 @@ export const createBankAccount = async ({
   accessToken,
   fundingSourceUrl,
   shareableId,
+  processor = 'dwolla', // Make sure processor has a default value
 }: createBankAccountProps) => {
   try {
     const { database } = await createAdminClient();
 
+    // Make sure processor is included in the document
     const bankAccount = await database.createDocument(
       DATABASE_ID!,
       BANK_COLLECTION_ID!,
@@ -173,8 +175,9 @@ export const createBankAccount = async ({
         accessToken,
         fundingSourceUrl,
         shareableId,
+        processor, // Make sure this is included
       }
-    )
+    );
 
     return parseStringify(bankAccount);
   } catch (error) {

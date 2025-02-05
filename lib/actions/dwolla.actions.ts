@@ -34,8 +34,14 @@ export const createFundingSource = async (
         plaidToken: options.plaidToken,
       })
       .then((res) => res.headers.get("location"));
-  } catch (err) {
+  } catch (err: any) {
+    // If it's a duplicate resource, return the existing funding source URL
+    if (err.body?.code === 'DuplicateResource' && err.body?._links?.about?.href) {
+      console.log('Using existing funding source:', err.body._links.about.href);
+      return err.body._links.about.href;
+    }
     console.error("Creating a Funding Source Failed: ", err);
+    throw err;
   }
 };
 
@@ -110,5 +116,34 @@ export const addFundingSource = async ({
     return await createFundingSource(fundingSourceOptions);
   } catch (err) {
     console.error("Transfer fund failed: ", err);
+  }
+};
+
+export const initiateMicroDeposits = async (fundingSourceUrl: string) => {
+  try {
+    await dwollaClient.post(`${fundingSourceUrl}/micro-deposits`);
+    return true;
+  } catch (err) {
+    console.error("Initiating micro-deposits failed:", err);
+    return false;
+  }
+};
+
+export const verifyMicroDeposits = async (fundingSourceUrl: string) => {
+  try {
+    await dwollaClient.post(`${fundingSourceUrl}/micro-deposits`, {
+      amount1: {
+        value: "0.03",
+        currency: "USD"
+      },
+      amount2: {
+        value: "0.09",
+        currency: "USD"
+      }
+    });
+    return true;
+  } catch (err) {
+    console.error("Verifying micro-deposits failed:", err);
+    return false;
   }
 };

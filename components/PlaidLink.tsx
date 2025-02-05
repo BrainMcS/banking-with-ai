@@ -26,12 +26,11 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
       await exchangePublicToken({
         publicToken: public_token,
         user,
-        processor,
+        processor,  // This is already being passed
       });
       router.push('/');
     } catch (error) {
       console.error('Error exchanging public token:', error);
-      // Handle error UI here
     }
   }, [user, processor]);
   
@@ -120,15 +119,16 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
           Connect bank
         </Button>
       ): variant === 'ghost' ? (
-        // Update the ghost button spacing as well
-        <Button onClick={handleConnectClick} variant="ghost" className="plaidlink-ghost">
+        <Button onClick={handleConnectClick} variant="ghost" className="flex gap-2">
           <Image 
-            src="/icons/connect-bank.svg"
-            alt="connect bank"
-            width={24}
-            height={24}
+            src="/icons/plus.svg"  // Changed to plus icon
+            width={20}             // Match original dimensions
+            height={20}
+            alt="plus"
           />
-          <p className='hiddenl text-[16px] font-semibold text-black-2 xl:block'>Connect bank</p>
+          <h2 className="text-14 font-semibold text-gray-600">
+            Add Bank
+          </h2>
         </Button>
       ): (
         <Button onClick={handleConnectClick} className="plaidlink-default">

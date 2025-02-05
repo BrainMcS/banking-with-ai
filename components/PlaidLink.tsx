@@ -5,29 +5,35 @@ import { useRouter } from 'next/navigation';
 import { createLinkToken, exchangePublicToken } from '@/lib/actions/user.actions';
 import Image from 'next/image';
 
+type PaymentProcessor = 'dwolla' | 'stripe';
+
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   const router = useRouter();
-
   const [token, setToken] = useState('');
+  const [processor, setProcessor] = useState<PaymentProcessor>('dwolla');
+  const [showProcessorSelect, setShowProcessorSelect] = useState(false);
 
   useEffect(() => {
     const getLinkToken = async () => {
       const data = await createLinkToken(user);
-
       setToken(data?.linkToken);
     }
-
     getLinkToken();
   }, [user]);
 
   const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string) => {
-    await exchangePublicToken({
-      publicToken: public_token,
-      user,
-    })
-
-    router.push('/');
-  }, [user])
+    try {
+      await exchangePublicToken({
+        publicToken: public_token,
+        user,
+        processor,
+      });
+      router.push('/');
+    } catch (error) {
+      console.error('Error exchanging public token:', error);
+      // Handle error UI here
+    }
+  }, [user, processor]);
   
   const config: PlaidLinkOptions = {
     token,
@@ -35,19 +41,87 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   }
 
   const { open, ready } = usePlaidLink(config);
+
+  const handleConnectClick = () => {
+    setShowProcessorSelect(true);
+  };
+
+  const handleProcessorSelect = (selectedProcessor: PaymentProcessor) => {
+    setProcessor(selectedProcessor);
+    setShowProcessorSelect(false);
+    open();
+  };
   
+  if (showProcessorSelect) {
+    return (
+      <div className="p-4 space-y-4 border rounded-lg shadow-sm bg-bank-gradient animate-in fade-in zoom-in duration-300">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-center gap-3 animate-in slide-in-from-top duration-500">
+            <Image 
+              src="/icons/connect-bank.svg"
+              alt="bank"
+              width={24}
+              height={24}
+              className="brightness-0 invert opacity-100"
+            />
+            <h2 className="text-[16px] font-semibold text-white">Choose Payment Processor</h2>
+          </div>
+          
+          <div className="flex flex-col gap-4 animate-in slide-in-from-bottom duration-500 delay-150">
+            <Button
+              onClick={() => handleProcessorSelect('dwolla')}
+              variant="outline"
+              className="flex items-center justify-center gap-2 hover:bg-orange-50 bg-white"
+            >
+              <Image 
+                src="/icons/dwolla.svg"
+                alt="Dwolla"
+                width={128}
+                height={128}
+              />
+              <span className="text-[16px] font-semibold text-black-2"/>
+            </Button>
+            <Button
+              onClick={() => handleProcessorSelect('stripe')}
+              variant="outline"
+              className="flex items-center justify-center gap-2 hover:bg-purple-50 bg-white"
+            >
+              <Image 
+                src="/icons/stripe.svg"
+                alt="Stripe"
+                width={64}
+                height={64}
+              />
+              <span className="text-[16px] font-semibold text-black-2"/>
+            </Button>
+          </div>
+
+          <Button
+            onClick={() => setShowProcessorSelect(false)}
+            role="button"
+            variant="ghost"
+            className="line-clamp-1 flex-1 text-[14px] font-medium w-fit mx-auto text-white hover:bg-gray-700/50 px-2 py-1 animate-in fade-in duration-700 delay-300"
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {variant === 'primary' ? (
         <Button
-          onClick={() => open()}
+          onClick={handleConnectClick}
           disabled={!ready}
           className="plaidlink-primary"
         >
           Connect bank
         </Button>
       ): variant === 'ghost' ? (
-        <Button onClick={() => open()} variant="ghost" className="plaidlink-ghost">
+        // Update the ghost button spacing as well
+        <Button onClick={handleConnectClick} variant="ghost" className="plaidlink-ghost">
           <Image 
             src="/icons/connect-bank.svg"
             alt="connect bank"
@@ -57,7 +131,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
           <p className='hiddenl text-[16px] font-semibold text-black-2 xl:block'>Connect bank</p>
         </Button>
       ): (
-        <Button onClick={() => open()} className="plaidlink-default">
+        <Button onClick={handleConnectClick} className="plaidlink-default">
           <Image 
             src="/icons/connect-bank.svg"
             alt="connect bank"
@@ -68,7 +142,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
         </Button>
       )}
     </>
-  )
+  );
 }
 
 export default PlaidLink

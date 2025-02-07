@@ -10,23 +10,25 @@ type PaymentProcessor = 'dwolla' | 'stripe';
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   const router = useRouter();
   const [token, setToken] = useState('');
-  const [processor, setProcessor] = useState<PaymentProcessor>('dwolla');
+  const [processor, setProcessor] = useState<PaymentProcessor>('dwolla'); // Set default value
   const [showProcessorSelect, setShowProcessorSelect] = useState(false);
 
   useEffect(() => {
     const getLinkToken = async () => {
-      const data = await createLinkToken(user);
+      const data = await createLinkToken(user, processor);
       setToken(data?.linkToken);
     }
     getLinkToken();
-  }, [user]);
+  }, [user, processor]);
 
+  // Add console.log to debug processor selection
   const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string) => {
     try {
+      console.log('Selected processor:', processor); // Add this line
       await exchangePublicToken({
         publicToken: public_token,
         user,
-        processor,  // This is already being passed
+        processor,
       });
       router.push('/');
     } catch (error) {
@@ -80,19 +82,36 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
               />
               <span className="text-[16px] font-semibold text-black-2"/>
             </Button>
-            <Button
-              onClick={() => handleProcessorSelect('stripe')}
-              variant="outline"
-              className="flex items-center justify-center gap-2 hover:bg-purple-50 bg-white"
-            >
-              <Image 
-                src="/icons/stripe.svg"
-                alt="Stripe"
-                width={64}
-                height={64}
-              />
-              <span className="text-[16px] font-semibold text-black-2"/>
-            </Button>
+            <div className="cursor-not-allowed" title="Stripe is not available in France">
+              <Button
+                disabled
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 hover:bg-purple-50 bg-white opacity-50"
+              >
+                <Image 
+                  src="/icons/stripe.svg"
+                  alt="Stripe"
+                  width={82}
+                  height={82}
+                />
+                <span className="text-[16px] font-semibold text-black-2"/>
+              </Button>
+            </div>
+            <div className="cursor-not-allowed" title="Coming soon">
+              <Button
+                disabled
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 hover:bg-blue-50 bg-white opacity-50"
+              >
+                <Image 
+                  src="/icons/adyen.svg"
+                  alt="Adyen"
+                  width={96}
+                  height={96}
+                />
+                <span className="text-[16px] font-semibold text-black-2"/>
+              </Button>
+            </div>
           </div>
 
           <Button

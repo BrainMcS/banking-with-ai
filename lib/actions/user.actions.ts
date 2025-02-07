@@ -5,10 +5,12 @@ import { createAdminClient, createSessionClient } from "../appwrite";
 import { cookies } from "next/headers";
 import { encryptId, extractCustomerIdFromUrl, parseStringify } from "../utils";
 import { CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestProcessorEnum, Products } from "plaid";
-
+// Add this import at the top with other imports
+import { stripe } from '../stripe';
 import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from "./dwolla.actions";
+import { createStripeBankAccount } from "./stripe.actions";
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -131,23 +133,56 @@ export const logoutAccount = async () => {
   }
 }
 
-export const createLinkToken = async (user: User) => {
+
+
+export const createLinkToken = async (user: User, processor: 'stripe' | 'dwolla') => {
   try {
+    let stripeAccountId;
+    
+    if (processor === 'stripe') {
+      // Create account using the token
+      const stripeAccount = await stripe.accounts.create({
+        type: 'express',
+        country: 'FR',
+        capabilities: {
+          transfers: { requested: true },
+        },
+        business_type: 'individual',
+        individual: {
+          first_name: user.firstName,
+          last_name: user.lastName,
+          email: user.email,
+        },
+        tos_acceptance: {
+          date: Math.floor(Date.now() / 1000),
+          ip: '127.0.0.1',
+          service_agreement: 'recipient',
+        },
+      });
+      
+      stripeAccountId = stripeAccount.id;
+    }
+
     const tokenParams = {
       user: {
         client_user_id: user.$id
       },
       client_name: `${user.firstName} ${user.lastName}`,
-      products: ['auth','transactions'] as Products[],
+      products: ['auth', 'transactions'] as Products[],
       language: 'en',
       country_codes: ['US'] as CountryCode[],
-    }
+      ...(processor === 'stripe' && {
+        stripe: {
+          account_id: stripeAccountId
+        }
+      })
+    };
 
     const response = await plaidClient.linkTokenCreate(tokenParams);
-
-    return parseStringify({ linkToken: response.data.link_token })
+    return parseStringify({ linkToken: response.data.link_token });
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
 
@@ -188,62 +223,73 @@ export const createBankAccount = async ({
 export const exchangePublicToken = async ({
   publicToken,
   user,
+  processor,
 }: exchangePublicTokenProps) => {
   try {
+    console.log('Processor in exchange:', processor); // Add this line
     // Exchange public token for access token and item ID
     const response = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
 
     const accessToken = response.data.access_token;
-    const itemId = response.data.item_id;
-    
-    // Get account information from Plaid using the access token
     const accountsResponse = await plaidClient.accountsGet({
       access_token: accessToken,
     });
 
     const accountData = accountsResponse.data.accounts[0];
 
-    // Create a processor token for Dwolla using the access token and account ID
-    const request: ProcessorTokenCreateRequest = {
-      access_token: accessToken,
-      account_id: accountData.account_id,
-      processor: "dwolla" as ProcessorTokenCreateRequestProcessorEnum,
-    };
+    if (processor === 'stripe') {
+      const bankAccount = await createStripeBankAccount({
+        accessToken,
+        accountId: accountData.account_id,
+        bankName: accountData.name,
+      });
+      
+      await createBankAccount({
+        userId: user.$id,
+        bankId: response.data.item_id,
+        accountId: accountData.account_id,
+        accessToken,
+        fundingSourceUrl: bankAccount.id,
+        shareableId: encryptId(accountData.account_id),
+        processor: 'stripe',
+      });
+    } else if (processor === 'dwolla') {
+      // Create Dwolla processor token
+      const request: ProcessorTokenCreateRequest = {
+        access_token: accessToken,
+        account_id: accountData.account_id,
+        processor: "dwolla" as ProcessorTokenCreateRequestProcessorEnum,
+      };
 
-    const processorTokenResponse = await plaidClient.processorTokenCreate(request);
-    const processorToken = processorTokenResponse.data.processor_token;
+      const processorTokenResponse = await plaidClient.processorTokenCreate(request);
+      const processorToken = processorTokenResponse.data.processor_token;
 
-     // Create a funding source URL for the account using the Dwolla customer ID, processor token, and bank name
-     const fundingSourceUrl = await addFundingSource({
-      dwollaCustomerId: user.dwollaCustomerId,
-      processorToken,
-      bankName: accountData.name,
-    });
-    
-    // If the funding source URL is not created, throw an error
-    if (!fundingSourceUrl) throw Error;
+      const fundingSourceUrl = await addFundingSource({
+        dwollaCustomerId: user.dwollaCustomerId,
+        processorToken,
+        bankName: accountData.name,
+      });
+      
+      if (!fundingSourceUrl) throw Error;
 
-    // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
-    await createBankAccount({
-      userId: user.$id,
-      bankId: itemId,
-      accountId: accountData.account_id,
-      accessToken,
-      fundingSourceUrl,
-      shareableId: encryptId(accountData.account_id),
-    });
+      await createBankAccount({
+        userId: user.$id,
+        bankId: response.data.item_id,
+        accountId: accountData.account_id,
+        accessToken,
+        fundingSourceUrl,
+        shareableId: encryptId(accountData.account_id),
+        processor: 'dwolla',
+      });
+    }
 
-    // Revalidate the path to reflect the changes
     revalidatePath("/");
-
-    // Return a success message
-    return parseStringify({
-      publicTokenExchange: "complete",
-    });
+    return parseStringify({ publicTokenExchange: "complete" });
   } catch (error) {
-    console.error("An error occurred while creating exchanging token:", error);
+    console.error("An error occurred while exchanging token:", error);
+    throw error;
   }
 }
 

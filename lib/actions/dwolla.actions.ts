@@ -69,6 +69,26 @@ export const createDwollaCustomer = async (
   }
 };
 
+export const getTransferStatus = async (transferUrl: string) => {
+  try {
+    const transfer = await dwollaClient.get(transferUrl);
+    return transfer.body.status;
+  } catch (err) {
+    console.error("Failed to get transfer status:", err);
+    throw err;
+  }
+};
+
+export const getFundingSourceBalance = async (fundingSourceUrl: string) => {
+  try {
+    const response = await dwollaClient.get(`${fundingSourceUrl}/balance`);
+    return response.body.balance;
+  } catch (err) {
+    console.error("Failed to get funding source balance:", err);
+    throw err;
+  }
+};
+
 export const createTransfer = async ({
   sourceFundingSourceUrl,
   destinationFundingSourceUrl,
@@ -89,9 +109,26 @@ export const createTransfer = async ({
         value: amount,
       },
     };
-    return await dwollaClient
+    const transferUrl = await dwollaClient
       .post("transfers", requestBody)
       .then((res) => res.headers.get("location"));
+
+    // Get initial transfer status and balance
+    const status = await getTransferStatus(transferUrl!);
+    console.log(`Transfer status: ${status}`);
+    
+    // Get updated balances
+    const sourceBalance = await getFundingSourceBalance(sourceFundingSourceUrl);
+    const destBalance = await getFundingSourceBalance(destinationFundingSourceUrl);
+    
+    console.log('Updated balances:', { sourceBalance, destBalance });
+
+    return {
+      transferUrl,
+      status,
+      sourceBalance,
+      destBalance
+    };
   } catch (err) {
     console.error("Transfer fund failed: ", err);
   }
@@ -119,31 +156,3 @@ export const addFundingSource = async ({
   }
 };
 
-export const initiateMicroDeposits = async (fundingSourceUrl: string) => {
-  try {
-    await dwollaClient.post(`${fundingSourceUrl}/micro-deposits`);
-    return true;
-  } catch (err) {
-    console.error("Initiating micro-deposits failed:", err);
-    return false;
-  }
-};
-
-export const verifyMicroDeposits = async (fundingSourceUrl: string) => {
-  try {
-    await dwollaClient.post(`${fundingSourceUrl}/micro-deposits`, {
-      amount1: {
-        value: "0.03",
-        currency: "USD"
-      },
-      amount2: {
-        value: "0.09",
-        currency: "USD"
-      }
-    });
-    return true;
-  } catch (err) {
-    console.error("Verifying micro-deposits failed:", err);
-    return false;
-  }
-};

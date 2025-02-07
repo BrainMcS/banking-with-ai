@@ -7,6 +7,8 @@ import Image from 'next/image';
 
 type PaymentProcessor = 'dwolla' | 'stripe';
 
+type PaymentProcessor = 'dwolla' | 'stripe';
+
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   const router = useRouter();
   const [token, setToken] = useState('');
@@ -132,6 +134,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
       {variant === 'primary' ? (
         <Button
           onClick={handleConnectClick}
+          onClick={handleConnectClick}
           disabled={!ready}
           className="plaidlink-primary"
         >
@@ -151,6 +154,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
         </Button>
       ): (
         <Button onClick={handleConnectClick} className="plaidlink-default">
+        <Button onClick={handleConnectClick} className="plaidlink-default">
           <Image 
             src="/icons/connect-bank.svg"
             alt="connect bank"
@@ -161,6 +165,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
         </Button>
       )}
     </>
+  );
   );
 }
 

@@ -40,7 +40,14 @@ export const createFundingSource = async (
       console.log('Using existing funding source:', err.body._links.about.href);
       return err.body._links.about.href;
     }
+  } catch (err: any) {
+    // If it's a duplicate resource, return the existing funding source URL
+    if (err.body?.code === 'DuplicateResource' && err.body?._links?.about?.href) {
+      console.log('Using existing funding source:', err.body._links.about.href);
+      return err.body._links.about.href;
+    }
     console.error("Creating a Funding Source Failed: ", err);
+    throw err;
     throw err;
   }
 };

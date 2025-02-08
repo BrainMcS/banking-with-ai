@@ -24,6 +24,7 @@ import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 import PlaidLink from './PlaidLink';
+import ThemeToggle from './shared/ThemeToggle';  // Add this import at the top
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
@@ -91,19 +92,20 @@ const AuthForm = ({ type }: { type: string }) => {
               width={34}
               height={34}
               alt="Horizon logo"
+              className="dark:invert"
             />
-            <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">Horizon</h1>
+            <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1 dark:text-white">Bank</h1>
           </Link>
 
           <div className="flex flex-col gap-1 md:gap-3">
-            <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
+            <h1 className="text-24 lg:text-36 font-semibold text-gray-900 dark:text-gray-100">
               {user 
                 ? 'Link Account'
                 : type === 'sign-in'
                   ? 'Sign In'
                   : 'Sign Up'
               }
-              <p className="text-16 font-normal text-gray-600">
+              <p className="text-16 font-normal text-gray-600 dark:text-gray-400">
                 {user 
                   ? 'Link your account to get started'
                   : 'Please enter your details'
@@ -158,17 +160,21 @@ const AuthForm = ({ type }: { type: string }) => {
           </Form>
 
           <footer className="flex justify-center gap-1">
-            <p className="text-14 font-normal text-gray-600">
+            <p className="text-14 font-normal text-gray-600 dark:text-gray-400">
               {type === 'sign-in'
               ? "Don't have an account?"
               : "Already have an account?"}
             </p>
-            <Link href={type === 'sign-in' ? '/sign-up' : '/sign-in'} className="form-link">
+            <Link href={type === 'sign-in' ? '/sign-up' : '/sign-in'} className="form-link dark:text-blue-400 dark:hover:text-blue-300">
               {type === 'sign-in' ? 'Sign up' : 'Sign in'}
             </Link>
           </footer>
         </>
       )}
+
+      <div className="mt-8 flex justify-center">
+        <ThemeToggle />
+      </div>
     </section>
   )
 }

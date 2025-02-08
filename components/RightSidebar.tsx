@@ -10,19 +10,19 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
   const categories: CategoryCount[] = countTransactionCategories(transactions);
 
   return (
-    <aside className="right-sidebar">
+    <aside className="right-sidebar dark:bg-dark-background dark:border-dark-border">
       <section className="flex flex-col pb-8">
-        <div className="profile-banner" />
+        <div className="profile-banner dark:bg-dark-muted" />
         <div className="profile">
-          <div className="profile-img">
+          <div className="profile-img dark:bg-dark-muted">
             <span className="text-5xl font-bold text-blue-500">{user.firstName[0]}</span>
           </div>
 
           <div className="profile-details">
-            <h1 className='profile-name'>
+            <h1 className='profile-name dark:text-white'>
               {user.firstName} {user.lastName}
             </h1>
-            <p className="profile-email">
+            <p className="profile-email dark:text-gray-400">
               {user.email}
             </p>
           </div>
@@ -31,7 +31,7 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
 
       <section className="banks">
         <div className="flex w-full justify-between">
-          <h2 className="header-2">My Banks</h2>
+          <h2 className="header-2 dark:text-white">My Banks</h2>
           <PlaidLink 
             user={user}
             variant="ghost"
@@ -62,7 +62,7 @@ const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
         )}
 
         <div className="mt-10 flex flex-1 flex-col gap-6">
-          <h2 className="header-2">Top categories</h2>
+          <h2 className="header-2 dark:text-white">Top categories</h2>
 
           <div className='space-y-5'>
             {categories.map((category, index) => (

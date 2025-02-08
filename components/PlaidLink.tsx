@@ -7,8 +7,6 @@ import Image from 'next/image';
 
 type PaymentProcessor = 'dwolla' | 'stripe';
 
-type PaymentProcessor = 'dwolla' | 'stripe';
-
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   const router = useRouter();
   const [token, setToken] = useState('');
@@ -57,7 +55,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   
   if (showProcessorSelect) {
     return (
-      <div className="p-4 space-y-4 border rounded-lg shadow-sm bg-bank-gradient animate-in fade-in zoom-in duration-300">
+      <div className="p-4 space-y-4 border rounded-lg shadow-sm bg-bank-gradient dark:bg-bank-gradient-dark animate-in fade-in zoom-in duration-300">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-center gap-3 animate-in slide-in-from-top duration-500">
             <Image 
@@ -82,7 +80,6 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
                 width={128}
                 height={128}
               />
-              <span className="text-[16px] font-semibold text-black-2"/>
             </Button>
             <div className="cursor-not-allowed" title="Stripe is not available in France">
               <Button
@@ -118,9 +115,8 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
 
           <Button
             onClick={() => setShowProcessorSelect(false)}
-            role="button"
             variant="ghost"
-            className="line-clamp-1 flex-1 text-[14px] font-medium w-fit mx-auto text-white hover:bg-gray-700/50 px-2 py-1 animate-in fade-in duration-700 delay-300"
+            className="line-clamp-1 flex-1 text-[14px] font-medium w-fit mx-auto text-white hover:bg-gray-700/50 dark:hover:bg-gray-600/50 px-2 py-1 animate-in fade-in duration-700 delay-300"
           >
             Cancel
           </Button>
@@ -134,38 +130,37 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
       {variant === 'primary' ? (
         <Button
           onClick={handleConnectClick}
-          onClick={handleConnectClick}
           disabled={!ready}
-          className="plaidlink-primary"
+          className="plaidlink-primary dark:bg-blue-600 dark:hover:bg-blue-700"
         >
           Connect bank
         </Button>
       ): variant === 'ghost' ? (
-        <Button onClick={handleConnectClick} variant="ghost" className="flex gap-2">
+        <Button onClick={handleConnectClick} variant="ghost" className="flex gap-2 dark:text-gray-300 dark:hover:bg-dark-muted">
           <Image 
-            src="/icons/plus.svg"  // Changed to plus icon
-            width={20}             // Match original dimensions
+            src="/icons/plus.svg"
+            width={20}
             height={20}
             alt="plus"
+            className="dark:invert"
           />
-          <h2 className="text-14 font-semibold text-gray-600">
+          <h2 className="text-14 font-semibold text-gray-600 dark:text-gray-300">
             Add Bank
           </h2>
         </Button>
-      ): (
-        <Button onClick={handleConnectClick} className="plaidlink-default">
-        <Button onClick={handleConnectClick} className="plaidlink-default">
-          <Image 
+      ) : (
+        <Button onClick={handleConnectClick} className="plaidlink-default dark:bg-dark-card dark:hover:bg-dark-muted">
+          <Image
             src="/icons/connect-bank.svg"
-            alt="connect bank"
+            alt="Connect Bank"
             width={24}
             height={24}
+            className="dark:invert"
           />
-          <p className='text-[16px] font-semibold text-black-2'>Connect bank</p>
+          <p className='text-[16px] font-semibold text-black-2 dark:text-gray-300'>Connect bank</p>
         </Button>
       )}
     </>
-  );
   );
 }
 

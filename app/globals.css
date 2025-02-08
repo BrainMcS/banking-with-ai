@@ -44,6 +44,24 @@
 }
 
 @layer utilities {
+  .dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: #1E293B; /* dark-card color */
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #334155; /* dark-muted color */
+    border-radius: 4px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+  
   .input-class {
     @apply text-16 placeholder:text-16 rounded-lg border border-gray-300 text-gray-900 placeholder:text-gray-500;
   }
@@ -106,7 +124,7 @@
 
   /* Home */
   .home {
-    @apply no-scrollbar flex w-full flex-row max-xl:max-h-screen max-xl:overflow-y-scroll;
+    @apply no-scrollbar flex w-[calc(100%-355px)] flex-row max-xl:max-h-screen max-xl:overflow-y-scroll ml-[355px];
   }
 
   .home-content {
@@ -159,7 +177,7 @@
   }
 
   .profile-banner {
-    @apply h-[120px] w-full bg-gradient-mesh bg-cover bg-no-repeat;
+    @apply h-[120px] w-full bg-gradient-mesh bg-cover bg-no-repeat dark:bg-gradient-to-r dark:from-[#B85800] dark:via-[#DAA520] dark:to-[#FFFFFF];
   }
 
   .profile {
@@ -186,14 +204,27 @@
     @apply flex flex-col justify-between gap-8 px-6 py-8;
   }
 
-  /* My Banks */
-  .my-banks {
-    @apply flex h-screen max-h-screen w-full flex-col gap-8 bg-gray-25 p-8 xl:py-12;
+  /* Markets*/
+  .markets {
+    @apply flex h-screen max-h-screen w-[calc(100%-355px)] flex-col gap-8 bg-gray-25 p-8 xl:py-12 ml-[355px];
+  }
+
+  .market-header {
+    @apply flex w-full flex-col items-start justify-between gap-8 md:flex-row;
+  }
+
+  .market-table {
+    @apply flex w-full flex-col items-start justify-between gap-8 md:flex-row;
   }
 
   /* My Banks */
+  .my-banks {
+    @apply flex h-screen max-h-screen w-[calc(100%-355px)] flex-col gap-8 bg-gray-25 p-8 xl:py-12 ml-[355px];
+  }
+
+  /* Transactions */
   .transactions {
-    @apply flex max-h-screen w-full flex-col gap-8 overflow-y-scroll bg-gray-25 p-8 xl:py-12;
+    @apply flex max-h-screen w-[calc(100%-355px)] flex-col gap-8 overflow-y-scroll bg-gray-25 p-8 xl:py-12 ml-[355px];
   }
 
   .transactions-header {
@@ -301,7 +332,7 @@
 
   /* Payment Transfer */
   .payment-transfer {
-    @apply no-scrollbar flex flex-col overflow-y-scroll bg-gray-25 p-8 md:max-h-screen xl:py-12;
+    @apply no-scrollbar flex w-[calc(100%-355px)] flex-col overflow-y-scroll bg-gray-25 p-8 md:max-h-screen xl:py-12 ml-[355px];
   }
 
   .payment-transfer_form-item {
@@ -361,7 +392,7 @@
 
   /* Sidebar */
   .sidebar {
-    @apply sticky left-0 top-0 flex h-screen w-fit flex-col  justify-between border-r border-gray-200 bg-white pt-8 text-white max-md:hidden sm:p-4 xl:p-6 2xl:w-[355px];
+    @apply fixed left-0 top-0 flex h-screen w-fit flex-col justify-between border-r border-gray-200 bg-white pt-8 text-white max-md:hidden sm:p-4 xl:p-6 2xl:w-[355px] z-50;
   }
 
   .sidebar-logo {
@@ -375,4 +406,42 @@
   .sidebar-label {
     @apply text-16 font-semibold text-black-2 max-xl:hidden;
   }
+}
+
+.ticker-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.ticker {
+  display: flex;
+  position: relative;
+}
+
+.ticker-track {
+  display: flex;
+  animation: ticker 30s linear infinite;
+  min-width: 100%;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  padding: 0 1.1rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
 }

@@ -31,41 +31,41 @@ const currentTransactions = account?.transactions.slice(
   indexOfFirstTransaction, indexOfLastTransaction
 )
   return (
-    <div className="transactions">
-      <div className="transactions-header">
+    <div className="transactions dark:bg-dark-background min-h-screen w-full">
+      <div className="transactions-header dark:bg-dark-background w-full">
         <HeaderBox 
           title="Transaction History"
           subtext="See your bank details and transactions."
         />
       </div>
 
-      <div className="space-y-6">
-        <div className="transactions-account">
+      <div className="space-y-6 dark:bg-dark-background w-full">
+        <div className="transactions-account dark:bg-dark-card">
           <div className="flex flex-col gap-2">
-            <h2 className="text-18 font-bold text-white">{account?.data.name}</h2>
-            <p className="text-14 text-blue-25">
+            <h2 className="text-18 font-bold text-white dark:text-white">{account?.data.name}</h2>
+            <p className="text-14 text-blue-25 dark:text-gray-400">
               {account?.data.officialName}
             </p>
-            <p className="text-14 font-semibold tracking-[1.1px] text-white">
+            <p className="text-14 font-semibold tracking-[1.1px] text-white dark:text-gray-300">
               ●●●● ●●●● ●●●● {account?.data.mask}
             </p>
           </div>
           
-          <div className='transactions-account-balance'>
-            <p className="text-14">Current balance</p>
-            <p className="text-24 text-center font-bold">{formatAmount(account?.data.currentBalance)}</p>
+          <div className='transactions-account-balance dark:text-gray-300'>
+            <p className="text-14 dark:text-gray-400">Current balance</p>
+            <p className="text-24 text-center font-bold dark:text-white">{formatAmount(account?.data.currentBalance)}</p>
           </div>
         </div>
 
-        <section className="flex w-full flex-col gap-6">
+        <section className="flex w-full flex-col gap-6 dark:bg-dark-background">
           <TransactionsTable 
             transactions={currentTransactions}
           />
-            {totalPages > 1 && (
-              <div className="my-4 w-full">
-                <Pagination totalPages={totalPages} page={currentPage} />
-              </div>
-            )}
+          {totalPages > 1 && (
+            <div className="my-4 w-full">
+              <Pagination totalPages={totalPages} page={currentPage} />
+            </div>
+          )}
         </section>
       </div>
     </div>

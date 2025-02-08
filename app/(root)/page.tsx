@@ -5,10 +5,12 @@ import TotalBalanceBox from '@/components/TotalBalanceBox';
 import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 
-const Home = async ({ searchParams }: { searchParams: { id?: string; page?: string } }) => {
-  const currentPage = Number(searchParams?.page) || 1;
-  const id = searchParams?.id;
-  
+
+const Home = async ({ searchParams }: { searchParams: Promise<{ id?: string; page?: string }> }) => {
+  const params = await searchParams;
+  const currentPage = Number(params?.page) || 1;
+  const id = params?.id;
+
   const loggedIn = await getLoggedInUser();
   const accounts = await getAccounts({
     userId: loggedIn?.$id,

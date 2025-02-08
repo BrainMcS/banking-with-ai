@@ -20,10 +20,24 @@ const config = {
     },
     extend: {
       colors: {
+        // Keep all existing colors
         fill: {
           1: "rgba(255, 255, 255, 0.10)",
+          dark: "rgba(0, 0, 0, 0.20)",  // Add dark variant
         },
-        bankGradient: "#0179FE",
+        bankGradient: {
+          DEFAULT: "#0179FE",
+          dark: "#1E40AF",  // Add dark variant
+        },
+        // Add dark theme colors
+        dark: {
+          background: "#0F172A",
+          foreground: "#E2E8F0",
+          muted: "#334155",
+          card: "#1E293B",
+          border: "#2D3748",
+          input: "#1E293B",
+        },
         indigo: {
           500: "#6172F3",
           700: "#3538CD",
@@ -72,8 +86,9 @@ const config = {
       backgroundImage: {
         "bank-gradient": "linear-gradient(90deg, #0179FE 0%, #4893FF 100%)",
         "gradient-mesh": "url('/icons/gradient-mesh.svg')",
-        "bank-green-gradient":
-          "linear-gradient(90deg, #01797A 0%, #489399 100%)",
+        "bank-green-gradient": "linear-gradient(90deg, #01797A 0%, #489399 100%)",
+        "bank-gradient-dark": "linear-gradient(90deg, #1E40AF 0%, #2563EB 100%)",
+        "black-card": "linear-gradient(110deg, #000000 0%, #1a1a1a 50%, #333333 100%)",
       },
       boxShadow: {
         form: "0px 1px 2px 0px rgba(16, 24, 40, 0.05)",

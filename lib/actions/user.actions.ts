@@ -39,7 +39,9 @@ export const signIn = async ({ email, password }: signInProps) => {
     const { account } = await createAdminClient();
     const session = await account.createEmailPasswordSession(email, password);
 
-    cookies().set("appwrite-session", session.secret, {
+    // Get cookie store and set cookie
+    const cookieStore = await cookies();
+    await cookieStore.set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
       sameSite: "strict",
@@ -47,10 +49,10 @@ export const signIn = async ({ email, password }: signInProps) => {
     });
 
     const user = await getUserInfo({ userId: session.userId }) 
-
     return parseStringify(user);
   } catch (error) {
     console.error('Error', error);
+    throw error; // Re-throw to handle in the UI
   }
 }
 
@@ -123,13 +125,30 @@ export async function getLoggedInUser() {
 
 export const logoutAccount = async () => {
   try {
-    const { account } = await createSessionClient();
+    // Delete cookie first
+    const cookieStore = cookies();
+    cookieStore.delete('appwrite-session', {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
 
-    cookies().delete('appwrite-session');
+    try {
+      // Try to delete session, but don't block if it fails
+      const { account } = await createSessionClient();
+      await account.deleteSession('current');
+    } catch {
+      // Ignore session errors since cookie is already deleted
+    }
 
-    await account.deleteSession('current');
+    // Revalidate to clear cached data
+    revalidatePath('/');
+    return { success: true };
   } catch (error) {
-    return null;
+    // Log error but don't expose it to client
+    console.error('Logout error:', error);
+    return { success: true }; // Still return success as cookie is deleted
   }
 }
 
@@ -293,19 +312,20 @@ export const exchangePublicToken = async ({
   }
 }
 
-export const getBanks = async ({ userId }: getBanksProps) => {
+export async function getBanks({ userId }: { userId: string }) {
   try {
     const { database } = await createAdminClient();
 
     const banks = await database.listDocuments(
       DATABASE_ID!,
       BANK_COLLECTION_ID!,
-      [Query.equal('userId', [userId])]
-    )
+      [Query.equal('userId', userId)] // Remove the extra array wrapping of userId
+    );
 
-    return parseStringify(banks.documents);
+    return banks.documents;
   } catch (error) {
-    console.log(error)
+    console.error('Error getting banks:', error);
+    throw error;
   }
 }
 

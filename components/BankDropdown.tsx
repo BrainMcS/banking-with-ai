@@ -45,33 +45,34 @@ export const BankDropdown = ({
       onValueChange={(value) => handleBankChange(value)}
     >
       <SelectTrigger
-        className={`flex w-full bg-white gap-3 md:w-[300px] ${otherStyles}`}
+        className={`flex w-full bg-white dark:bg-dark-card dark:text-gray-200 gap-3 md:w-[300px] ${otherStyles}`}
       >
         <Image
           src="icons/credit-card.svg"
           width={20}
           height={20}
           alt="account"
+          className="dark:invert"
         />
-        <p className="line-clamp-1 w-full text-left">{selected.name}</p>
+        <p className="line-clamp-1 w-full text-left dark:text-gray-200">{selected.name}</p>
       </SelectTrigger>
       <SelectContent
-        className={`w-full bg-white md:w-[300px] ${otherStyles}`}
+        className={`w-full bg-white dark:bg-dark-card md:w-[300px] ${otherStyles}`}
         align="end"
       >
         <SelectGroup>
-          <SelectLabel className="py-2 font-normal text-gray-500">
+          <SelectLabel className="py-2 font-normal text-gray-500 dark:text-gray-400">
             Select a bank to display
           </SelectLabel>
           {accounts.map((account: Account) => (
             <SelectItem
               key={account.id}
               value={account.appwriteItemId}
-              className="cursor-pointer border-t"
+              className="cursor-pointer border-t dark:border-dark-border dark:hover:bg-dark-muted dark:focus:bg-dark-muted"
             >
-              <div className="flex flex-col ">
-                <p className="text-16 font-medium">{account.name}</p>
-                <p className="text-14 font-medium text-blue-600">
+              <div className="flex flex-col">
+                <p className="text-16 font-medium dark:text-gray-200">{account.name}</p>
+                <p className="text-14 font-medium text-blue-600 dark:text-blue-400">
                   {formatAmount(account.currentBalance)}
                 </p>
               </div>

@@ -1,3 +1,4 @@
+
 export const sidebarLinks = [
   {
     imgURL: "/icons/home.svg",
@@ -19,6 +20,11 @@ export const sidebarLinks = [
     route: "/payment-transfer",
     label: "Transfer Funds",
   },
+  {
+    imgURL:"/icons/dollar.svg",
+    label: 'Market',
+    route: '/market',
+  }
 ];
 
 // good_user / good_password - Bank of America

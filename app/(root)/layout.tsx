@@ -1,8 +1,10 @@
+import MarketTicker from '@/components/MarketTicker';
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+
 
 export default async function RootLayout({
   children,
@@ -24,7 +26,12 @@ export default async function RootLayout({
             <MobileNav user={loggedIn} />
           </div>
         </div>
-        {children}
+        <div className="relative flex-1 overflow-auto">
+          {children}
+          <div className="sticky bottom-0 w-full">
+            <MarketTicker />
+          </div>
+        </div>
       </div>
     </main>
   );

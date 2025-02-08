@@ -19,14 +19,22 @@ export const metadata: Metadata = {
   }
 };
 
+import { ThemeProvider } from '@/lib/context/ThemeContext';
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${ibmPlexSerif.variable}`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${ibmPlexSerif.variable} font-inter bg-white dark:bg-dark-background text-gray-900 dark:text-gray-100`}>
+        <ThemeProvider>
+          <div className="min-h-screen transition-colors">
+            {children}
+          </div>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

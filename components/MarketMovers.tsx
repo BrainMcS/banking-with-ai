@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import FinancialAI from './FinancialAI'
+import FinancialAdvisor from '@/components/FinancialAdvisor';
 
 interface StockMovement {
   ticker: string
@@ -61,7 +61,7 @@ const MarketMovers = () => {
     };
 
     fetchRecommendations();
-    const interval = setInterval(fetchRecommendations, 60000);
+    const interval = setInterval(fetchRecommendations, 300000);
     return () => clearInterval(interval);
   }, []);
 
@@ -159,13 +159,13 @@ const MarketMovers = () => {
 
   return (
     
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8">
-      <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Top Gainers */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Top Gainers</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+    <div className="flex flex-col gap-4">
+    {/* Top Gainers */}
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Top Gainers</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          {/* ... Top Gainers table content ... */}
               <thead>
                 <tr className="text-sm text-gray-500 dark:text-gray-400 border-b">
                   <th className="text-left pb-3">Symbol</th>
@@ -189,10 +189,11 @@ const MarketMovers = () => {
         </div>
       
         {/* Top Losers */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          {/* ... Top Losers table content ... */}
               <thead>
                 <tr className="text-sm text-gray-500 dark:text-gray-400 border-b">
                   <th className="text-left pb-3">Symbol</th>
@@ -215,12 +216,6 @@ const MarketMovers = () => {
           </div>
         </div>
       </div>
-    
-      {/* Financial AI Section */}
-      <div className="col-span-2">
-        <FinancialAI />
-      </div>
-    </div>
   )
 }
 

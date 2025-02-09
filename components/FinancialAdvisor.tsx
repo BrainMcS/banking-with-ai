@@ -11,6 +11,70 @@ interface Message {
 }
 
 // Change to default export
+const PRESET_PROMPTS = [
+  "What are the top performing tech stocks this week?",
+  "Analyze NVIDIA's recent performance",
+  "Compare Apple and Microsoft stocks",
+  "Explain current market trends",
+  "What are the best dividend stocks?",
+  "Analyze crypto market conditions"
+];
+
+const formatResponse = (content: string) => {
+  // First split by main sections (###)
+  const sections = content.split(/(?=###)/);
+  
+  return sections.map((section, index) => {
+    // Updated regex to handle multi-digit numbers
+    const numberedSections = section.split(/(?=(?:\d{1,2})\.\s+\*\*[^*]+\*\*)/);
+    
+    return (
+      <div key={index} className="space-y-4">
+        {numberedSections.map((part, partIndex) => {
+          if (part.startsWith('###')) {
+            return (
+              <h3 key={partIndex} className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-4 mb-2">
+                {part.replace('###', '').trim()}
+              </h3>
+            );
+          }
+          
+          // Updated regex for number matching
+          const match = part.match(/^(\d{1,2})\.\s+\*\*([^*]+)\*\*(.*)/s);
+          if (match) {
+            const [_, number, title, content] = match;
+            return (
+              <div key={partIndex} className="bg-gray-50 dark:bg-gray-600 rounded-lg p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{number}.</span>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-emerald-700 dark:text-emerald-300 mb-2">
+                      {title.trim()}
+                    </h4>
+                    <div className="text-gray-600 dark:text-gray-300 space-y-2">
+                      {content.split(/(?=[-•])/g).map((item, i) => (
+                        <div key={i} className="ml-4">
+                          {item.trim()}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          
+          return (
+            <p key={partIndex} className="text-gray-600 dark:text-gray-300">
+              {part}
+            </p>
+          );
+        })}
+      </div>
+    );
+  });
+};
+
 export default function FinancialAdvisor() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,9 +127,20 @@ export default function FinancialAdvisor() {
   };
 
   return (
-    <div className="flex flex-col h-[600px]"> {/* Fixed height */}
+    <div className="fixed right-0 top-0 h-screen w-[400px] flex flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
       <div className="flex justify-between items-center p-4 border-b">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Chat History</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Financial Advisor</h3>
+        <select
+          value={selectedModel?.id}
+          onChange={(e) => setSelectedModel(models.find(m => m.id === e.target.value) || null)}
+          className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600"
+        >
+          {models.map(model => (
+            <option key={model.id} value={model.id}>
+              {model.label}
+            </option>
+          ))}
+        </select>
         <div className="flex gap-2">
           <button
             onClick={handleRegenerateResponse}
@@ -95,9 +170,9 @@ export default function FinancialAdvisor() {
             <div className={`max-w-[80%] rounded-lg p-3 ${
               msg.role === 'user' 
                 ? 'bg-blue-500 text-white' 
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                : 'bg-gray-100 dark:bg-gray-700'
             }`}>
-              {msg.content}
+              {msg.role === 'assistant' ? formatResponse(msg.content) : msg.content}
             </div>
           </div>
         ))}
@@ -108,22 +183,21 @@ export default function FinancialAdvisor() {
         )}
       </div>
       
-      <div className="border-t p-4 bg-white dark:bg-gray-800">
-        <div className="flex gap-3 mb-4"> {/* Increased gap */}
-          {models.map(model => (
-            <button
-              key={model.id}
-              onClick={() => setSelectedModel(model)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedModel.id === model.id 
-                  ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-              }`}
-            >
-              {model.label}
-            </button>
-          ))}
-        </div>
+      <div className="sticky bottom-0 border-t p-4 bg-white dark:bg-gray-800" style={{ marginBottom: '48px' }}>
+        {messages.length === 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {PRESET_PROMPTS.map((prompt, index) => (
+              <button
+                key={index}
+                onClick={() => handleSubmit(prompt)}
+                disabled={loading}
+                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full transition-colors"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
         
         <form onSubmit={(e) => {
           e.preventDefault();

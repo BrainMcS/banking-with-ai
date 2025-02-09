@@ -1,6 +1,83 @@
 import { NextResponse } from 'next/server';
 import { OpenAI } from 'openai'; // Ensure this import is correct
 
+import {
+  type LanguageModelV1,
+  convertToCoreMessages,
+  createDataStreamResponse,
+  generateObject,
+  streamObject,
+  streamText,
+} from 'ai';
+import { z } from 'zod';
+
+import { auth } from '@/app/(auth)/auth';
+import { customModel } from '@/lib/ai';
+import { AIModel, models } from '@/lib/ai/models';
+import {
+  codePrompt,
+  systemPrompt,
+  updateDocumentPrompt,
+} from '@/lib/ai/prompts';
+import {
+  deleteChatById,
+  getChatById,
+  getDocumentById,
+  saveChat,
+  saveDocument,
+  saveMessages,
+  saveSuggestions,
+} from '@/lib/db/queries';
+import type { Suggestion } from '@/lib/db/schema';
+import {
+  generateUUID,
+  getMostRecentUserMessage,
+  sanitizeResponseMessages,
+} from '@/lib/utils';
+
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Anthropic from '@anthropic-ai/sdk';
+import { generateTitleFromUserMessage } from '../../actions';
+import { AISDKExporter } from 'langsmith/vercel';
+import { validStockSearchFilters } from '@/lib/api/stock-filters';
+import { createGeminiAdapter, createClaudeAdapter } from '@/lib/ai/adapters';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+interface Task {
+  task_name: string;
+  class: string;
+}
+
+type AllowedTools =
+  | 'getCurrentStockPrice'
+  | 'getStockPrices'
+  | 'getIncomeStatements'
+  | 'getBalanceSheets'
+  | 'getCashFlowStatements'
+  | 'getFinancialMetrics'
+  | 'searchStocksByFilters'
+  | 'createDocument'
+  | 'updateDocument'
+  | 'requestSuggestions';
+
+const financialDatasetsTools: AllowedTools[] = [
+  'getCurrentStockPrice',
+  'getStockPrices',
+  'getIncomeStatements',
+  'getBalanceSheets',
+  'getCashFlowStatements',
+  'getFinancialMetrics',
+  'searchStocksByFilters'
+];
+
+const documentTools: AllowedTools[] = [
+  'createDocument',
+  'updateDocument',
+  'requestSuggestions'
+];
+
+const allTools: AllowedTools[] = [...financialDatasetsTools, ...documentTools];
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });

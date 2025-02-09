@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import FinancialAdvisor from '@/components/FinancialAdvisor';
 
 interface StockMovement {
   ticker: string
@@ -159,64 +158,62 @@ const MarketMovers = () => {
 
   return (
     
-    <div className="flex flex-col gap-4">
-    {/* Top Gainers */}
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Top Gainers</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          {/* ... Top Gainers table content ... */}
-              <thead>
-                <tr className="text-sm text-gray-500 dark:text-gray-400 border-b">
-                  <th className="text-left pb-3">Symbol</th>
-                  <th className="text-right pb-3">Price</th>
-                  <th className="text-right pb-3">Change</th>
-                  <th className="text-right pb-3">Volume</th>
+    <div className="flex flex-col gap-4 max-w-2xl mx-auto"> {/* Added max-w-2xl and mx-auto */}
+      {/* Top Gainers */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Gainers</h3> {/* Increased text size */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-base"> {/* Increased base text size */}
+            <thead>
+              <tr className="text-base text-gray-500 dark:text-gray-400 border-b"> {/* Increased header text size */}
+                <th className="text-left pb-3">Symbol</th>
+                <th className="text-right pb-3">Price</th>
+                <th className="text-right pb-3">Change</th>
+                <th className="text-right pb-3">Volume</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topMovers.top_gainers.slice(0, 5).map((stock, index) => (
+                <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="py-3 text-base font-medium text-gray-900 dark:text-white">{stock.ticker}</td>
+                  <td className="py-3 text-base text-right text-gray-600 dark:text-gray-300">${Number(stock.price).toFixed(2)}</td>
+                  <td className="py-3 text-base text-right text-green-500">+{stock.change_percentage}</td>
+                  <td className="py-3 text-base text-right text-gray-600 dark:text-gray-300">{Number(stock.volume).toLocaleString()}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {topMovers.top_gainers.slice(0, 5).map((stock, index) => (
-                  <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="py-3 text-sm font-medium text-gray-900 dark:text-white">{stock.ticker}</td>
-                    <td className="py-3 text-sm text-right text-gray-600 dark:text-gray-300">${Number(stock.price).toFixed(2)}</td>
-                    <td className="py-3 text-sm text-right text-green-500">+{stock.change_percentage}</td>
-                    <td className="py-3 text-sm text-right text-gray-600 dark:text-gray-300">{Number(stock.volume).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      
-        {/* Top Losers */}
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          {/* ... Top Losers table content ... */}
-              <thead>
-                <tr className="text-sm text-gray-500 dark:text-gray-400 border-b">
-                  <th className="text-left pb-3">Symbol</th>
-                  <th className="text-right pb-3">Price</th>
-                  <th className="text-right pb-3">Change</th>
-                  <th className="text-right pb-3">Volume</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topMovers?.top_losers.slice(0, 5).map((stock, index) => (
-                  <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="py-3 text-sm font-medium text-gray-900 dark:text-white">{stock.ticker}</td>
-                    <td className="py-3 text-sm text-right text-gray-600 dark:text-gray-300">${Number(stock.price).toFixed(2)}</td>
-                    <td className="py-3 text-sm text-right text-red-500">{stock.change_percentage}</td>
-                    <td className="py-3 text-sm text-right text-gray-600 dark:text-gray-300">{Number(stock.volume).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-  )
+      
+      {/* Top Losers */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3> {/* Increased text size */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-base"> {/* Increased base text size */}
+            <thead>
+              <tr className="text-base text-gray-500 dark:text-gray-400 border-b"> {/* Increased header text size */}
+                <th className="text-left pb-3">Symbol</th>
+                <th className="text-right pb-3">Price</th>
+                <th className="text-right pb-3">Change</th>
+                <th className="text-right pb-3">Volume</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topMovers?.top_losers.slice(0, 5).map((stock, index) => (
+                <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="py-3 text-base font-medium text-gray-900 dark:text-white">{stock.ticker}</td>
+                  <td className="py-3 text-base text-right text-gray-600 dark:text-gray-300">${Number(stock.price).toFixed(2)}</td>
+                  <td className="py-3 text-base text-right text-red-500">{stock.change_percentage}</td>
+                  <td className="py-3 text-base text-right text-gray-600 dark:text-gray-300">{Number(stock.volume).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default MarketMovers

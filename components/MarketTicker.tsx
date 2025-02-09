@@ -91,7 +91,7 @@ const MarketTicker = () => {
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-gray-900 to-gray-800 dark:from-[#1a1f2e] dark:to-[#2d3748] py-3">
+    <div className="fixed bottom-0 left-0 right-0 w-full bg-gradient-to-r from-gray-900 to-gray-800 dark:from-[#1a1f2e] dark:to-[#2d3748] py-3 z-40">
       <div className="ticker-wrapper">
         <div className="ticker">
           <div className="ticker-track">
@@ -127,7 +127,7 @@ const MarketTicker = () => {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default MarketTicker
+export default MarketTicker;

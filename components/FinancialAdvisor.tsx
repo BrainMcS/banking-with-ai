@@ -53,47 +53,8 @@ export default function FinancialAdvisor() {
     setMessages(prev => [...prev, newMessage]);
 
     try {
-      const response = await fetch('/api/financial-advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: chatId,
-          messages: [...messages, newMessage],
-          modelId: selectedModel.id,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to get response');
-
-      const reader = response.body?.getReader();
-      if (!reader) return;
-
-      // Handle streaming response
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Process chunks and update UI
-        const chunk = new TextDecoder().decode(value);
-        try {
-          const data = JSON.parse(chunk);
-          // Handle different types of responses (tasks, messages, etc.)
-          if (data.type === 'text-delta') {
-            setMessages(prev => {
-              const lastMessage = prev[prev.length - 1];
-              if (lastMessage?.role === 'assistant') {
-                return [
-                  ...prev.slice(0, -1),
-                  { ...lastMessage, content: lastMessage.content + data.content }
-                ];
-              }
-              return [...prev, { role: 'assistant', content: data.content }];
-            });
-          }
-        } catch (e) {
-          console.warn('Error parsing chunk:', e);
-        }
-      }
+      const completeResponse = await getChatCompletion([...messages, newMessage], selectedModel.id);
+      setMessages(prev => [...prev, { role: 'assistant', content: completeResponse }]);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -190,4 +151,70 @@ export default function FinancialAdvisor() {
       </div>
     </div>
   );
+}
+
+// Define the getChatCompletion function
+async function getChatCompletion(messages: any[], modelId: string = 'gpt-4') {
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
+  const response = await fetch(`${baseUrl}/api/financial-advisor`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ messages, modelId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'API request failed');
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('Response body is empty.');
+  }
+
+  const decoder = new TextDecoder();
+  let partialResponse = "";
+  let completeResponse = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    const chunk = decoder.decode(value);
+    partialResponse += chunk;
+
+    while (true) {
+      const newlineIndex = partialResponse.indexOf('\n');
+      if (newlineIndex === -1) {
+        break;
+      }
+
+      const line = partialResponse.substring(0, newlineIndex);
+      partialResponse = partialResponse.substring(newlineIndex + 1);
+
+      try {
+        const jsonChunk = JSON.parse(line);
+
+        if (jsonChunk.content && jsonChunk.content.choices && jsonChunk.content.choices[0] && jsonChunk.content.choices[0].delta && jsonChunk.content.choices[0].delta.content) {
+          completeResponse += jsonChunk.content.choices[0].delta.content;
+          console.log("Partial response:", jsonChunk.content.choices[0].delta.content);
+        }
+
+        if (jsonChunk.content && jsonChunk.content.choices && jsonChunk.content.choices[0] && jsonChunk.content.choices[0].finish_reason === "stop") {
+          console.log("Full response:", completeResponse);
+        }
+
+      } catch (error) {
+        console.error("Error parsing JSON:", error, line);
+      }
+    }
+  }
+
+  console.log("Final Response:", completeResponse); // Log the complete response
+  return completeResponse;
 }

@@ -1,35 +1,42 @@
 import { NextResponse } from 'next/server';
+import { OpenAI } from 'openai'; // Ensure this import is correct
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: Request) {
   try {
     const { messages, modelId } = await request.json();
 
-    // For now, let's create a simple response
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
+    // Create a data stream for the response
+    const dataStream = new ReadableStream({
       async start(controller) {
-        const responses = [
-          "I'm your AI Financial Advisor. ",
-          "I can help you with market analysis, ",
-          "investment strategies, ",
-          "and financial planning."
-        ];
+        const response = await openai.chat.completions.create({
+          model: modelId,
+          messages: messages.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+          temperature: 0.7,
+          stream: true,
+        });
 
-        // Send each part of the response with a small delay
-        for (const part of responses) {
-          const message = {
-            type: 'text-delta',
-            content: part
-          };
-          controller.enqueue(encoder.encode(JSON.stringify(message) + '\n'));
-          await new Promise(resolve => setTimeout(resolve, 100));
+        for await (const chunk of response) {
+          if (chunk) {
+            controller.enqueue(JSON.stringify({
+              type: 'text',
+              content: chunk,
+              role: 'assistant'
+            }) + '\n');
+          }
         }
-        
+
         controller.close();
       }
     });
 
-    return new Response(stream, {
+    return new Response(dataStream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -41,3 +48,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

@@ -163,7 +163,7 @@ const MarketMovers = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Gainers</h3> {/* Increased text size */}
         <div className="overflow-x-auto">
-          <table className="w-full text-base"> {/* Increased base text size */}
+          <table className="w-full text-base">
             <thead>
               <tr className="text-base text-gray-500 dark:text-gray-400 border-b"> {/* Increased header text size */}
                 <th className="text-left pb-3">Symbol</th>
@@ -190,7 +190,7 @@ const MarketMovers = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3> {/* Increased text size */}
         <div className="overflow-x-auto">
-          <table className="w-full text-base"> {/* Increased base text size */}
+          <table className="w-full text-base">
             <thead>
               <tr className="text-base text-gray-500 dark:text-gray-400 border-b"> {/* Increased header text size */}
                 <th className="text-left pb-3">Symbol</th>

@@ -1,0 +1,2 @@
+ALTER TABLE "Chat" ADD COLUMN "path" text DEFAULT '/chat' NOT NULL;
+ALTER TABLE "Chat" ALTER COLUMN "id" TYPE text;

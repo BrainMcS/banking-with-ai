@@ -36,15 +36,19 @@ interface ChatProps {
   availableModels: Array<AIModel>;  // Add this line
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  routePrefix: string;
+  apiEndpoint: string;
 }
 
 export function Chat({
   id,
   initialMessages,
   selectedModelId,
-  availableModels, // Add this to destructuring
+  availableModels,
   selectedVisibilityType,
   isReadonly,
+  routePrefix,
+  apiEndpoint,
 }: ChatProps) {
   const { mutate } = useSWRConfig();
   const [showApiKeysModal, setShowApiKeysModal] = useState(false);
@@ -62,6 +66,7 @@ export function Chat({
     reload,
   } = useChat({
     id,
+    api: apiEndpoint,  // Use the provided apiEndpoint
     body: { 
       id, 
       modelId: selectedModelId,
@@ -72,10 +77,11 @@ export function Chat({
     initialMessages,
     experimental_throttle: 100,
     onFinish: () => {
-      mutate('/api/history');
+      mutate(`${routePrefix}/history`);  // Use the provided routePrefix
     },
   });
 
+  // Update the messages count endpoint
   const handleFormSubmit = async (
     event?: {
       preventDefault?: () => void;
@@ -88,7 +94,7 @@ export function Chat({
 
     try {
       const provider = getModelProvider(selectedModelId);
-      const response = await fetch('/api/messages/count');
+      const response = await fetch(`${routePrefix}/messages/count`);  // Use routePrefix here too
       const data = await response.json();
       
       if (!response.ok) {
@@ -122,13 +128,20 @@ export function Chat({
     }
   };
 
+  // Update the votes endpoint
   const { data: votes } = useSWR<Array<Vote>>(
-    `/api/vote?chatId=${id}`,
+    `${routePrefix}/vote?chatId=${id}`,  // Use routePrefix here
     fetcher,
   );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isBlockVisible = useBlockSelector((state) => state.isVisible);
+
+  const handleClear = async () => {
+    setMessages([]);
+    await fetch(`/api/chat/${id}`, { method: 'DELETE' });
+    mutate('/api/history');
+  };
 
   return (
     <>
@@ -138,6 +151,8 @@ export function Chat({
           selectedModelId={selectedModelId}
           selectedVisibilityType={selectedVisibilityType}
           isReadonly={isReadonly}
+          onClear={handleClear}
+          onRefresh={reload}
         />
 
         <Messages

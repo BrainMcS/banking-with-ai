@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition, useMemo, useOptimistic, useState, useEffect } from 'react';
-import { saveModelId } from '@/app/(chat)/actions';
+import { saveModelId } from '@/lib/actions/chatActions';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -28,20 +28,30 @@ export function ModelSelector({
     const checkAvailableModels = async () => {
       try {
         setIsLoading(true);
-        const keys = {
+        
+        // First try to get environment variables directly
+        const response = await fetch('/api/env');
+        const envKeys = await response.json();
+        
+        // Then check local storage keys
+        const localKeys = {
           openai: await getOpenAIApiKey(),
           gemini: await getGeminiApiKey(),
           claude: await getClaudeApiKey()
         };
 
-        // Only fetch from environment if no local keys are available
-        if (!Object.values(keys).some(Boolean)) {
-          const response = await fetch('/api/env');
-          const envKeys = await response.json();
-          keys.openai = keys.openai || envKeys.openaiApiKey;
-          keys.gemini = keys.gemini || envKeys.googleApiKey;
-          keys.claude = keys.claude || envKeys.anthropicApiKey;
-        }
+        // Combine environment and local storage keys
+        const keys = {
+          openai: envKeys.OPENAI_API_KEY || localKeys.openai,
+          gemini: envKeys.GOOGLE_API_KEY || localKeys.gemini,
+          claude: envKeys.ANTHROPIC_API_KEY || localKeys.claude
+        };
+
+        console.log('Available API keys:', {
+          openai: !!keys.openai,
+          gemini: !!keys.gemini,
+          claude: !!keys.claude
+        });
 
         const filtered = models.filter(model => {
           switch (model.provider) {
@@ -56,6 +66,8 @@ export function ModelSelector({
           }
         });
 
+        console.log('Filtered models:', filtered.map(m => m.label));
+
         if (filtered.length > 0) {
           setAvailableModels(filtered);
           if (!filtered.some(m => m.id === optimisticModelId)) {
@@ -67,14 +79,14 @@ export function ModelSelector({
         }
       } catch (error) {
         console.error('Error checking API keys:', error);
-        setAvailableModels(models); // Fallback to all models
+        setAvailableModels([models[0]]); // Fallback to first model only
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAvailableModels();
-  }, []); // Remove optimisticModelId dependency
+  }, [optimisticModelId]);
 
   const selectedModel = useMemo(
     () => availableModels.find((model) => model.id === optimisticModelId) || availableModels[0],

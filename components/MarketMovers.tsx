@@ -64,13 +64,6 @@ const MarketMovers = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Remove this duplicate declaration:
-  // const [topMovers, setTopMovers] = useState<TopMovers>({
-  //   top_gainers: [],
-  //   top_losers: [],
-  //   most_actively_traded: []
-  // })
-
   useEffect(() => {
     const fetchMarketMovers = async () => {
       try {
@@ -158,8 +151,7 @@ const MarketMovers = () => {
 
   return (
     
-    <div className="flex flex-col gap-4 max-w-2xl mx-auto"> {/* Added max-w-2xl and mx-auto */}
-      {/* Top Gainers */}
+    <div className="flex flex-col gap-4 max-w-2xl mx-auto">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Gainers</h3> {/* Increased text size */}
         <div className="overflow-x-auto">
@@ -185,14 +177,12 @@ const MarketMovers = () => {
           </table>
         </div>
       </div>
-      
-      {/* Top Losers */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3> {/* Increased text size */}
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Top Losers</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-base">
             <thead>
-              <tr className="text-base text-gray-500 dark:text-gray-400 border-b"> {/* Increased header text size */}
+              <tr className="text-base text-gray-500 dark:text-gray-400 border-b">
                 <th className="text-left pb-3">Symbol</th>
                 <th className="text-right pb-3">Price</th>
                 <th className="text-right pb-3">Change</th>

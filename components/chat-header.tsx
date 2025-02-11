@@ -11,17 +11,22 @@ import { useSidebar } from './ui/sidebar';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { VisibilityType, VisibilitySelector } from './visibility-selector';
+import { RefreshCw, Trash2 } from 'lucide-react';  // Add this import at the top
 
 function PureChatHeader({
   chatId,
   selectedModelId,
   selectedVisibilityType,
   isReadonly,
+  onClear,
+  onRefresh,
 }: {
   chatId: string;
   selectedModelId: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  onClear?: () => void;
+  onRefresh?: () => void;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -39,7 +44,7 @@ function PureChatHeader({
               variant="outline"
               className="order-2 md:order-1 md:px-2 px-2 md:h-fit ml-auto md:ml-0"
               onClick={() => {
-                router.push('/');
+                router.push(routePrefix || '/');  // Update this line
                 router.refresh();
               }}
             >
@@ -51,10 +56,39 @@ function PureChatHeader({
         </Tooltip>
       )}
 
+      {/* Add these buttons */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRefresh}
+            className="order-3"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Refresh Conversation</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClear}
+            className="order-4"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Clear Conversation</TooltipContent>
+      </Tooltip>
+
       {!isReadonly && (
         <ModelSelector
           selectedModelId={selectedModelId}
-          className="order-1 md:order-2"
+          className="order-5"
         />
       )}
 
@@ -62,7 +96,7 @@ function PureChatHeader({
         <VisibilitySelector
           chatId={chatId}
           selectedVisibilityType={selectedVisibilityType}
-          className="order-1 md:order-3"
+          className="order-6"
         />
       )}
     </header>

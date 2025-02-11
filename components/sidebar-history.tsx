@@ -58,12 +58,7 @@ type GroupedChats = {
   older: Chat[];
 };
 
-const PureChatItem = ({
-  chat,
-  isActive,
-  onDelete,
-  setOpenMobile,
-}: {
+const PureChatItem = ({ chat, isActive, onDelete, setOpenMobile }: {
   chat: Chat;
   isActive: boolean;
   onDelete: (chatId: string) => void;
@@ -77,7 +72,7 @@ const PureChatItem = ({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
+        <Link href={`/market/${chat.id}`} onClick={() => setOpenMobile(false)}>
           <span>{chat.title}</span>
         </Link>
       </SidebarMenuButton>
@@ -157,7 +152,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     data: history,
     isLoading,
     mutate,
-  } = useSWR<Array<Chat>>(user ? '/api/history' : null, fetcher, {
+  } = useSWR<Array<Chat>>(user ? '/api/market/history' : null, fetcher, {
     fallbackData: [],
   });
 
@@ -168,8 +163,11 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
+
   const handleDelete = async () => {
-    const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
+    if (!deleteId) return;
+
+    const deletePromise = fetch(`/api/market/${deleteId}`, {
       method: 'DELETE',
     });
 
@@ -178,8 +176,9 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
       success: () => {
         mutate((history) => {
           if (history) {
-            return history.filter((h) => h.id !== id);
+            return history.filter((h) => h.id !== deleteId);
           }
+          return history;
         });
         return 'Chat deleted successfully';
       },
@@ -189,7 +188,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     setShowDeleteDialog(false);
 
     if (deleteId === id) {
-      router.push('/');
+      router.push('/market');
     }
   };
 

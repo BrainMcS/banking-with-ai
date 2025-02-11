@@ -20,7 +20,7 @@ const CustomInput = ({ control, name, label, placeholder }: CustomInput) => {
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
+s      render={({ field }) => (
         <div className="form-item">
           <FormLabel className="form-label dark:text-gray-300">
             {label}

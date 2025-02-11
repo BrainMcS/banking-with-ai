@@ -10,7 +10,7 @@ import type {
   Message,
   ToolInvocation,
 } from 'ai';
-import { track as vercelTrack } from '@vercel/analytics';
+//import { track as vercelTrack } from '@vercel/analytics';
 
 import type { Message as DBMessage, Document } from '@/lib/db/schema';
 
@@ -282,6 +282,11 @@ export function generateUUID(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+export function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
 }
 
 function addToolMessageToChat({

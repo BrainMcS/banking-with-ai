@@ -54,7 +54,7 @@
     "langsmith": "latest",
     "lightweight-charts": "^5.0.1",
     "lucide-react": "^0.374.0",
-    "next": "^15.1.6",
+    "next": "^15.3.0",
     "next-auth": "^4.24.11",
     "node-appwrite": "^12.0.1",
     "openai": "^4.83.0",
